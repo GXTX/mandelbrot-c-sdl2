@@ -6,8 +6,8 @@
 #include <assert.h>
 #include <SDL.h>
 
-#define WINDOW_HEIGHT 640
-#define WINDOW_WIDTH  480
+#define WINDOW_WIDTH  640
+#define WINDOW_HEIGHT 480
 #define WINDOW_TITLE "Mandelbrot Fractal, by Geographer"
 
 typedef struct Sdl {
@@ -27,7 +27,7 @@ typedef struct Fractal {
   double xMove;
   double yMove;
   double zoom;
-  float iMax;
+  unsigned int iMax;
 } Fractal;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,8 +42,8 @@ Sdl *init_sdl() {
       WINDOW_TITLE,
       SDL_WINDOWPOS_UNDEFINED,
       SDL_WINDOWPOS_UNDEFINED,
-      WINDOW_HEIGHT,
       WINDOW_WIDTH,
+      WINDOW_HEIGHT,
       SDL_WINDOW_SHOWN);
 
   sdl->renderer = SDL_CreateRenderer(sdl->window, -1, 0);
@@ -132,7 +132,7 @@ int main(void) {
   float moveStep = 0.5;
   float zoomStep = 3.0;
 
-  XVideoSetMode(WINDOW_HEIGHT, WINDOW_WIDTH, 32, REFRESH_DEFAULT);
+  XVideoSetMode(WINDOW_WIDTH, WINDOW_HEIGHT, 32, REFRESH_DEFAULT);
 
   // Init the structures
   Sdl *sdl = init_sdl();
@@ -174,3 +174,4 @@ int main(void) {
 
   return 0;
 }
+
