@@ -13,6 +13,7 @@
 typedef struct Sdl {
   SDL_Window *window;
   SDL_Renderer *renderer;
+  SDL_Event event;
   SDL_GameController *controller;
 } Sdl;
 
@@ -64,7 +65,7 @@ Fractal *init_fractal() {
 
   // Used to change the zoom and precision
   fractal->zoom = 0.3;
-  fractal->iMax = 60;
+  fractal->iMax = 15;
 
   return fractal;
 }
@@ -143,32 +144,36 @@ int main(void) {
 
   // User can exit program using escape
   while (1) {
-    debugPrint("Update\n");
-    SDL_GameControllerUpdate();
-
-    if (SDL_GameControllerGetButton(sdl->controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT)) {
-      fractal->xMove = fractal->xMove + (moveStep / fractal->zoom * delta);
-      draw_mandelbrot(sdl, fractal);
-    } else if (SDL_GameControllerGetButton(sdl->controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT)) {
-      fractal->xMove = fractal->xMove - (moveStep / fractal->zoom * delta);
-      draw_mandelbrot(sdl, fractal);
-    } else if (SDL_GameControllerGetButton(sdl->controller, SDL_CONTROLLER_BUTTON_DPAD_UP)) {
-      fractal->yMove = fractal->yMove + (moveStep / fractal->zoom * delta);
-      draw_mandelbrot(sdl, fractal);
-    } else if (SDL_GameControllerGetButton(sdl->controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN)) {
-      fractal->yMove = fractal->yMove - (moveStep / fractal->zoom * delta);
-      draw_mandelbrot(sdl, fractal);
-    } else if (SDL_GameControllerGetButton(sdl->controller, SDL_CONTROLLER_BUTTON_A)) {
-      fractal->zoom = fractal->zoom + (moveStep * fractal->zoom * delta);
-      fractal->iMax = fractal->iMax + zoomStep * delta;
-      draw_mandelbrot(sdl, fractal);
-    } else if (SDL_GameControllerGetButton(sdl->controller, SDL_CONTROLLER_BUTTON_Y) && (fractal->zoom - (moveStep * fractal->zoom * delta)) > 0.3) {
-      fractal->zoom = fractal->zoom - (moveStep * fractal->zoom * delta);
-      fractal->iMax = fractal->iMax - zoomStep * delta;
-      draw_mandelbrot(sdl, fractal);
+    while (SDL_PollEvent(&sdl->event)) {
+      if (sdl->event.type == SDL_CONTROLLERBUTTONDOWN) {
+        switch (sdl->event.cbutton.button) {
+          case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+            fractal->xMove = fractal->xMove + (moveStep / fractal->zoom * delta);
+            break;
+          case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+            fractal->xMove = fractal->xMove - (moveStep / fractal->zoom * delta);
+            break;
+          case SDL_CONTROLLER_BUTTON_DPAD_UP:
+            fractal->yMove = fractal->yMove + (moveStep / fractal->zoom * delta);
+            break;
+          case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+            fractal->yMove = fractal->yMove - (moveStep / fractal->zoom * delta);
+            break;
+          case SDL_CONTROLLER_BUTTON_A:
+            fractal->zoom = fractal->zoom + (moveStep * fractal->zoom * delta);
+            fractal->iMax = fractal->iMax + zoomStep * delta;
+            break;
+          case SDL_CONTROLLER_BUTTON_Y:
+            fractal->zoom = fractal->zoom - (moveStep * fractal->zoom * delta);
+            fractal->iMax = fractal->iMax - zoomStep * delta;
+            break;
+          default:
+            break;
+        }
+        debugPrint("Update\n");
+        draw_mandelbrot(sdl, fractal);
+      }
     }
-
-    //draw_mandelbrot(sdl, fractal);
     SDL_RenderPresent(sdl->renderer);
   }
 
