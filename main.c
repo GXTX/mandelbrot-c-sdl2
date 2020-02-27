@@ -39,15 +39,9 @@ Sdl *init_sdl() {
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
   SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
 
-  sdl->window = SDL_CreateWindow(
-      WINDOW_TITLE,
-      SDL_WINDOWPOS_UNDEFINED,
-      SDL_WINDOWPOS_UNDEFINED,
-      WINDOW_WIDTH,
-      WINDOW_HEIGHT,
-      SDL_WINDOW_SHOWN);
+  SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 
+    SDL_WINDOW_SHOWN, &sdl->window, &sdl->renderer);
 
-  sdl->renderer = SDL_CreateRenderer(sdl->window, -1, 0);
   sdl->controller = SDL_GameControllerOpen(0);
 
   // Force a controller present
@@ -65,7 +59,7 @@ Fractal *init_fractal() {
 
   // Used to change the zoom and precision
   fractal->zoom = 0.3;
-  fractal->iMax = 15;
+  fractal->iMax = 60;
 
   return fractal;
 }
@@ -86,12 +80,11 @@ void draw_mandelbrot(Sdl *sdl, Fractal *fractal) {
   int y;
 
   // Calculate all the y for every x
-  for (x = 0; x < xFrame; x++) {
-    c.r = ((x - xFrame / 2) / (0.5 * xFrame * fractal->zoom)) - fractal->xMove;
+  for (y = 0; y < yFrame; y++) {
+    c.i = ((y - yFrame / 2) / (0.5 * yFrame * fractal->zoom)) - fractal->yMove;
 
-    for (y = 0; y < yFrame; y++) {
-      c.i = ((y - yFrame / 2) /
-        (0.5 * yFrame * fractal->zoom)) - fractal->yMove;
+    for (x = 0; x < xFrame; x++) {
+      c.r = ((x - xFrame / 2) / (0.5 * xFrame * fractal->zoom)) - fractal->xMove;
 
       z.r = 0;
       z.i = 0;
@@ -107,20 +100,17 @@ void draw_mandelbrot(Sdl *sdl, Fractal *fractal) {
       } while (z.r * z.r + z.i * z.i < 4 && i < fractal->iMax);
       // We don't use square root in order to reduce calculation time
 
+      SDL_Point point = {x, y};
+
       if (i >= fractal->iMax) {
         // In the set
         SDL_SetRenderDrawColor(sdl->renderer, 0, 0, 255, 255);
-        SDL_RenderDrawPoint(sdl->renderer, x, y);
+        SDL_RenderDrawPoints(sdl->renderer, &point, 1);
       } else {
         // Not in the set
-        SDL_SetRenderDrawColor(sdl->renderer, 0, 0, i * (255 / fractal->iMax),
-          255);
-        SDL_RenderDrawPoint(sdl->renderer, x, y);
+        SDL_SetRenderDrawColor(sdl->renderer, 0, 0, i * (255 / fractal->iMax), 255);
+        SDL_RenderDrawPoints(sdl->renderer, &point, 1);
       }
-
-      // Render using SDL_RenderDrawPoint() is slow and should
-      // be replaced by SDL_RenderDrawPoints()
-      // Could save time if we didn't do `SetRenderDrawColor` every calc
     }
   }
 }
@@ -142,7 +132,6 @@ int main(void) {
   // Draw the inital
   draw_mandelbrot(sdl, fractal);
 
-  // User can exit program using escape
   while (1) {
     while (SDL_PollEvent(&sdl->event)) {
       if (sdl->event.type == SDL_CONTROLLERBUTTONDOWN) {
