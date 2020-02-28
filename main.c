@@ -118,12 +118,12 @@ void draw_mandelbrot(Sdl *sdl, Fractal *fractal) {
         // In the set
         color <<= 8;
         color += 0xFF;
-        *(uint32_t*)&pixels[(y * xFrame + x)] = color;
+        pixels[(y * xFrame + x)] = color;
       } else {
         // Not in the set
         color <<= 8;
         color += i * (255 / fractal->iMax);
-        *(uint32_t*)&pixels[(y * xFrame + x)] = color;
+        pixels[(y * xFrame + x)] = color;
       }
     }
   }
