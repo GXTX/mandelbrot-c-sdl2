@@ -106,23 +106,15 @@ void draw_mandelbrot(Sdl *sdl, Fractal *fractal) {
       } while (z.r * z.r + z.i * z.i < 4 && i < fractal->iMax);
       // We don't use square root in order to reduce calculation time
 
-      // BAD BAD
-      uint32_t color;
-      color += 0xFF;
-      color <<= 8;
-      color += 0x00;
-      color <<= 8;
-      color += 0x00;
+      uint32_t color = 0x00FF0000;
 
       if (i >= fractal->iMax) {
         // In the set
-        color <<= 8;
-        color += 0xFF;
+        color = (color << 8) ^ 0xFF;
         pixels[(y * xFrame + x)] = color;
       } else {
         // Not in the set
-        color <<= 8;
-        color += i * (255 / fractal->iMax);
+        color = (color << 8) ^ i * (255 / fractal->iMax);
         pixels[(y * xFrame + x)] = color;
       }
     }
