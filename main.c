@@ -13,21 +13,22 @@
 typedef struct Sdl {
   SDL_Window *window;
   SDL_Renderer *renderer;
+  SDL_Surface *surface;
   SDL_Event event;
   SDL_GameController *controller;
 } Sdl;
 
 typedef struct Complex {
   // Real part, imaginary part and a backup
-  double r;
-  double i;
-  double b;
+  float r;
+  float i;
+  float b;
 } Complex;
 
 typedef struct Fractal {
-  double xMove;
-  double yMove;
-  double zoom;
+  float xMove;
+  float yMove;
+  float zoom;
   unsigned int iMax;
 } Fractal;
 
@@ -42,6 +43,7 @@ Sdl *init_sdl() {
   SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 
     SDL_WINDOW_SHOWN, &sdl->window, &sdl->renderer);
 
+  sdl->surface = SDL_GetWindowSurface(sdl->window);
   sdl->controller = SDL_GameControllerOpen(0);
 
   // Force a controller present
@@ -66,6 +68,10 @@ Fractal *init_fractal() {
 
 void draw_mandelbrot(Sdl *sdl, Fractal *fractal) {
   int i;
+
+  SDL_LockSurface(sdl->surface);
+
+  uint32_t *pixels = sdl->surface->pixels;
 
   int xFrame = WINDOW_WIDTH;
   int yFrame = WINDOW_HEIGHT;
@@ -100,19 +106,28 @@ void draw_mandelbrot(Sdl *sdl, Fractal *fractal) {
       } while (z.r * z.r + z.i * z.i < 4 && i < fractal->iMax);
       // We don't use square root in order to reduce calculation time
 
-      SDL_Point point = {x, y};
+      // BAD BAD
+      uint32_t color;
+      color += 0xFF;
+      color <<= 8;
+      color += 0x00;
+      color <<= 8;
+      color += 0x00;
 
       if (i >= fractal->iMax) {
         // In the set
-        SDL_SetRenderDrawColor(sdl->renderer, 0, 0, 255, 255);
-        SDL_RenderDrawPoints(sdl->renderer, &point, 1);
+        color <<= 8;
+        color += 0xFF;
+        *(uint32_t*)&pixels[(y * xFrame + x)] = color;
       } else {
         // Not in the set
-        SDL_SetRenderDrawColor(sdl->renderer, 0, 0, i * (255 / fractal->iMax), 255);
-        SDL_RenderDrawPoints(sdl->renderer, &point, 1);
+        color <<= 8;
+        color += i * (255 / fractal->iMax);
+        *(uint32_t*)&pixels[(y * xFrame + x)] = color;
       }
     }
   }
+  SDL_UnlockSurface(sdl->surface);
 }
 
 int main(void) {
