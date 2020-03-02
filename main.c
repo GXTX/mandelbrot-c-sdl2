@@ -72,6 +72,7 @@ void draw_mandelbrot(Sdl *sdl, Fractal *fractal) {
   SDL_LockSurface(sdl->surface);
 
   uint32_t *pixels = sdl->surface->pixels;
+  SDL_PixelFormat *pixelFormat = sdl->surface->format;
 
   int xFrame = WINDOW_WIDTH;
   int yFrame = WINDOW_HEIGHT;
@@ -106,16 +107,12 @@ void draw_mandelbrot(Sdl *sdl, Fractal *fractal) {
       } while (z.r * z.r + z.i * z.i < 4 && i < fractal->iMax);
       // We don't use square root in order to reduce calculation time
 
-      uint32_t color = 0x00FF0000;
-
       if (i >= fractal->iMax) {
         // In the set
-        color = (color << 8) ^ 0xFF;
-        pixels[(y * xFrame + x)] = color;
+        pixels[(y * xFrame + x)] = SDL_MapRGB(pixelFormat, 0, 0, 255);
       } else {
         // Not in the set
-        color = (color << 8) ^ i * (255 / fractal->iMax);
-        pixels[(y * xFrame + x)] = color;
+        pixels[(y * xFrame + x)] = SDL_MapRGB(pixelFormat, 0, 0, (i * (255 / fractal->iMax)));
       }
     }
   }
