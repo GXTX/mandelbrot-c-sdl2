@@ -49,7 +49,7 @@ class Fractal
 
         SDL_LockSurface($sdl->surface);
 
-        //$pixels      = $sdl->surface->pixels; // Accessing pixels causes SIGSEGV
+        //$pixels      = $sdl->surface->pixels; // SIGSEGV
         $pixelFormat = $sdl->surface->format;
 
         for($y = 0; $y < WINDOW_HEIGHT; $y++) {
@@ -69,9 +69,13 @@ class Fractal
 
                 if ($i >= self::$iMax) {
                     //$pixels[($y * WINDOW_WIDTH + $x)] = SDL_MapRGB($pixelFormat, 0 ,0 , 255);
+                    $sdl->surface->pixels[($y * WINDOW_WIDTH + $x)] = 
+                        SDL_MapRGB($pixelFormat, 0 ,0 , 255);
                 }
                 else {
                     //$pixels[($y * WINDOW_WIDTH + $x)] = SDL_MapRGB($pixelFormat, 0, 0, ($i * (255 / $this->iMax)));
+                    $sdl->surface->pixels[($y * WINDOW_WIDTH + $x)] = 
+                        SDL_MapRGB($pixelFormat, 0, 0, ($i * (255 / self::$iMax)));
                 }
             }
         }
