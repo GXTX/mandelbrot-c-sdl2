@@ -94,7 +94,7 @@ while (1) {
         switch ($sdl->event->type) {
             case SDL_QUIT:
                 print "Killing everything...\n";
-                goto end; // BAD BAD BAD
+                return;
                 break;
             default:
                 break;
@@ -105,7 +105,6 @@ while (1) {
     SDL_RenderPresent($sdl->renderer);
 }
 
-end: // BAD BAD BAD
 SDL_JoystickClose($sdl->joystick);
 SDL_FreeSurface($sdl->surface);
 SDL_DestroyRenderer($sdl->renderer);
