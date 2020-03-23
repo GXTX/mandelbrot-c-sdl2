@@ -17,7 +17,7 @@ class SDL {
 
     public function __construct()
     {
-        SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
+        SDL_Init(SDL_INIT_EVERYTHING);
         $this->window   = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
         $this->renderer = SDL_CreateRenderer($this->window, -1, SDL_RENDERER_ACCELERATED);
@@ -49,9 +49,6 @@ class Fractal
 
         SDL_LockSurface($sdl->surface);
 
-        //$pixels      = $sdl->surface->pixels; // SIGSEGV
-        $pixelFormat = $sdl->surface->format;
-
         for($y = 0; $y < WINDOW_HEIGHT; $y++) {
             $c->i = (($y - WINDOW_HEIGHT / 2) / (0.5 * WINDOW_HEIGHT * self::$zoom)) - $this->yMove;
 
@@ -68,14 +65,12 @@ class Fractal
                 } while ($z->r * $z->r + $z->i * $z->i < 4 && $i < self::$iMax);
 
                 if ($i >= self::$iMax) {
-                    //$pixels[($y * WINDOW_WIDTH + $x)] = SDL_MapRGB($pixelFormat, 0 ,0 , 255);
-                    $sdl->surface->pixels[($y * WINDOW_WIDTH + $x)] = 
-                        SDL_MapRGB($pixelFormat, 0 ,0 , 255);
+                    $sdl->surface->pixels[($y * WINDOW_WIDTH + $x)] =
+                        SDL_MapRGB($sdl->surface->format, 0 ,0 , 255);
                 }
                 else {
-                    //$pixels[($y * WINDOW_WIDTH + $x)] = SDL_MapRGB($pixelFormat, 0, 0, ($i * (255 / $this->iMax)));
-                    $sdl->surface->pixels[($y * WINDOW_WIDTH + $x)] = 
-                        SDL_MapRGB($pixelFormat, 0, 0, ($i * (255 / self::$iMax)));
+                    $sdl->surface->pixels[($y * WINDOW_WIDTH + $x)] =
+                        SDL_MapRGB($sdl->surface->format, 0, 0, ($i * (255 / self::$iMax)));
                 }
             }
         }
@@ -112,6 +107,7 @@ while (1) {
 
 end: // BAD BAD BAD
 SDL_JoystickClose($sdl->joystick);
+SDL_FreeSurface($sdl->surface);
 SDL_DestroyRenderer($sdl->renderer);
 SDL_DestroyWindow($sdl->window);
 SDL_Quit();
